@@ -200,6 +200,7 @@ import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.account.auth_server.AuthServerHelper
 
 import com.movtery.zalithlauncher.game.account.getAccountTypeName
+import com.movtery.zalithlauncher.ui.screens.content.settings.LauncherChinesePixelFontCard
 import com.movtery.zalithlauncher.ui.screens.content.settings.LauncherDownloadSourceCards
 import com.movtery.zalithlauncher.ui.screens.content.settings.LauncherLanguageCard
 import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.CardPosition
@@ -6239,6 +6240,7 @@ private fun LauncherSettingsTab(
 ) {
 
     LauncherLanguageCard(CardPosition.Single)
+    LauncherChinesePixelFontCard(CardPosition.Single)
     LauncherDownloadSourceCards(CardPosition.Single, CardPosition.Single)
 
     Column(

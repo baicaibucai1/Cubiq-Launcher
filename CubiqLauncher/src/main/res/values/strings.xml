@@ -1085,6 +1085,8 @@
     <string name="settings_launcher_color_theme_style">Palette Style</string>
     <string name="settings_launcher_dark_mode_title">Dark Mode</string>
     <string name="settings_launcher_language">Language</string>
+    <string name="settings_launcher_chinese_pixel_font">Chinese pixel font</string>
+    <string name="settings_launcher_chinese_pixel_font_summary">Use Fusion Pixel for Simplified Chinese with the Minecraft pixel font style.</string>
     <string name="settings_launcher_full_screen_title">Fullscreen Mode</string>
     <string name="settings_launcher_full_screen_summary">Make the launcher pages fullscreen, ignoring safe areas like notches and punch-holes</string>
     <string name="settings_launcher_animate_speed_title">Animation Speed</string>
