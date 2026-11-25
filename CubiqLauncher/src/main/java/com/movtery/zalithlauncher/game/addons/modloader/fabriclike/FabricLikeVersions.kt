@@ -25,7 +25,6 @@ import com.movtery.zalithlauncher.game.addons.mirror.runMirrorable
 import com.movtery.zalithlauncher.game.addons.modloader.fabriclike.models.FabricLikeLoader
 import com.movtery.zalithlauncher.game.addons.modloader.fabriclike.models.FabricLikeVersionsJson
 import com.movtery.zalithlauncher.path.GLOBAL_CLIENT
-import com.movtery.zalithlauncher.utils.isChinaMainland
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.safeBodyAsJson
 import com.movtery.zalithlauncher.utils.network.withRetry
@@ -33,6 +32,7 @@ import io.ktor.client.request.get
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "FabricLikeVersions"
 
@@ -40,7 +40,7 @@ abstract class FabricLikeVersions(
     val officialUrl: String,
     val mirrorUrl: String? = null
 ) {
-    private var cacheVersions: FabricLikeVersionsJson? = null
+    private val cacheVersions = ConcurrentHashMap<String, FabricLikeVersionsJson>()
 
     /**
      * 通用 Loader 列表获取
@@ -51,17 +51,13 @@ abstract class FabricLikeVersions(
         tag: String,
         mcVersion: String
     ): List<FabricLikeLoader>? = withContext(Dispatchers.Default) {
-        mirrorUrl?.takeIf { isChinaMainland() }?.let {
-            runMirrorable(
-                listOf(
-                    fetchListFromMirrorSource(SourceType.OFFICIAL, force, tag, mcVersion, officialUrl),
-                    fetchListFromMirrorSource(SourceType.BMCLAPI, force, tag, mcVersion, it)
-                ).orderedByGameSourcePreference()
-            )
-        } ?: run {
-            //不支持镜像源，只使用官方源
-            fetchListWithSource(force, tag, mcVersion, officialUrl)
-        }
+        runMirrorable(
+            listOfNotNull(
+                fetchListFromMirrorSource(SourceType.OFFICIAL, force, tag, mcVersion, officialUrl),
+                mirrorUrl?.let { fetchListFromMirrorSource(SourceType.BMCLAPI, force, tag, mcVersion, it) }
+            ).orderedByGameSourcePreference(),
+            accept = { it.isNotEmpty() }
+        )
     }
 
     private fun fetchListFromMirrorSource(
@@ -70,7 +66,7 @@ abstract class FabricLikeVersions(
         tag: String,
         mcVersion: String,
         sourceUrl: String
-    ): MirrorSource<List<FabricLikeLoader>?> = MirrorSource(type) {
+    ): MirrorSource<List<FabricLikeLoader>> = MirrorSource(type) {
         fetchListWithSource(force, tag, mcVersion, sourceUrl)
     }
 
@@ -86,12 +82,12 @@ abstract class FabricLikeVersions(
         val url = "$sourceUrl/versions"
         try {
             val versions: FabricLikeVersionsJson = run {
-                if (!force && cacheVersions != null) return@run cacheVersions!!
+                if (!force) cacheVersions[sourceUrl]?.let { return@run it }
                 withContext(Dispatchers.IO) {
                     withRetry(tag, maxRetries = 2) { GLOBAL_CLIENT.get(url).safeBodyAsJson() }
                 }
             }.also {
-                cacheVersions = it
+                cacheVersions[sourceUrl] = it
             }
 
             if (!versions.game.any { it.version == mcVersion }) {

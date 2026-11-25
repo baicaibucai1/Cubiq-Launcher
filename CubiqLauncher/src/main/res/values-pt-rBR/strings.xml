@@ -519,7 +519,7 @@
     <string name="files_select_dir">Selecionar Pasta</string>
     <string name="files_current_path">Caminho atual: %s</string>
     <string name="files_no_selectable_content">Nenhum conteúdo selecionável</string>
-    <string name="file_invalid_length">Nome muito longo! (Atual: %d, Máximo: %d)</string>
+    <string name="file_invalid_length">Nome muito longo! (Atual: %1$d, Máximo: %2$d)</string>
     <string name="file_invalid_leading_or_trailing_space">Não é possível começar ou terminar com um espaço!</string>
     <string name="multirt_runtime_corrupt">Java runtime Corrompido</string>
     <string name="multirt_runtime_incompatible_arch">Arquitetura incompatível: %s</string>
@@ -1224,7 +1224,7 @@
     <string name="control_editor_edit_joystick_style_list_empty">Não há estilos de joystick no layout de controle atual</string>
     <string name="control_editor_edit_joystick_style_list_name">Nome do estilo do joystick</string>
     <string name="control_editor_edit_joystick_style_list_delete">Tem certeza de que deseja excluir o estilo de joystick mano? %s</string>
-    <string name="duration_format">%s Dias ou %s Horas ou %s Minutos</string>
+    <string name="duration_format">%1$s Dias ou %2$s Horas ou %3$s Minutos</string>
     <string name="saves_manage_playtime">Tempo jogado: %s</string>
     <string name="fm_initializing">Inicializando…</string>
     <string name="fm_init_failed">Falha na inicialização: %s</string>

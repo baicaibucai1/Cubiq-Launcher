@@ -108,7 +108,7 @@
     <string name="custom_mouse_add">Add Virtual Mouse</string>
     <string name="custom_mouse_added">Successfully set virtual mouse:</string>
     <string name="custom_mouse_default">Default Virtual Mouse</string>
-    <string name="custom_mouse_dialog">You can add mouse images in (Launcher Settings - %s - %s)</string>
+    <string name="custom_mouse_dialog">You can add mouse images in (Launcher Settings - %1$s - %2$s)</string>
     <string name="custom_mouse_message_default">The currently selected virtual mouse is the default virtual mouse, sharing, renaming, and deleting operations are not supported</string>
     <string name="custom_mouse_title">Custom Virtual Mouse</string>
     <string name="dialog_select_jar">Select Jar File</string>
@@ -133,7 +133,7 @@
     <string name="download_install_dependencies_optional">Optional</string>
     <string name="download_install_dependencies_required">Required</string>
     <string name="download_install_dependencies_tool">Tool</string>
-    <string name="download_install_download_file">Downloading resource file (%.2fMB / %.2fMB, speed: %s/s)</string>
+    <string name="download_install_download_file">Downloading resource file (%1$.2fMB / %2$.2fMB, speed: %3$s/s)</string>
     <string name="download_install_is_adapt">Current version %s is available</string>
     <string name="download_install_unpack_world_error">Unable to recognize file structure, automatic unpacking failed, please handle the file manually!</string>
     <string name="download_search_failed">Failed to search for resources!</string>
@@ -168,7 +168,7 @@
     <string name="file_message">Please select the operation you want to perform on this file</string>
     <string name="file_multi_select_mode_message">Currently selected a total of %d items</string>
     <string name="file_multi_select_mode_title">Multi-select items</string>
-    <string name="file_operation_file">Operating file… (%s / %s, %d)</string>
+    <string name="file_operation_file">Operating file… (%1$s / %2$s, %3$d)</string>
     <string name="file_rename_exitis">File name conflicts with an existing file!</string>
     <string name="file_select_folder">Select folder</string>
     <string name="file_tips">Operate this file</string>
@@ -215,8 +215,8 @@
     <string name="mod_check_imblocker">IMBlocker/In-GameIME (%s) is not compatible with Android and will cause the game to crash during startup.</string>
     <string name="mod_check_mcef">MCEF (%s) cannot run on Android. It is usually used as a prerequisite dependency for WebDisplays/In-game Browser (browser).</string>
     <string name="mod_check_physics">The currently used physics mod (%s) is unpatched (replacing libPhysXJniBindings_64.so from x86_64 architecture to arm64), will crash on launch.</string>
-    <string name="mod_check_progress_message">Checking mods (%d / %d)</string>
-    <string name="mod_check_replay_mod">ReplayMod (%s) requires FFmpeg to render videos. Please install the FFmpeg plugin separately\n%s\n%s</string>
+    <string name="mod_check_progress_message">Checking mods (%1$d / %2$d)</string>
+    <string name="mod_check_replay_mod">ReplayMod (%1$s) requires FFmpeg to render videos. Please install the FFmpeg plugin separately\n%2$s\n%3$s</string>
     <string name="mod_check_sodium_or_embeddium">Detected installed Sodium or Embeddium mod (%s). The launcher will disable this mod\'s warnings or prevent it from intentionally crashing on Android devices. However, please note that the mod\'s community has explicitly stated that they will no longer accept any issues related to Android devices. Therefore, if you encounter any problems while using this mod, do not report them to the mod\'s community!</string>
     <string name="mod_check_touch_controller">Detected that Touch Controller mod (%s) is installed, the launcher is ready to enable control proxy to adapt to the mod.</string>
     <string name="mod_check_valkyrien_skies">Valkyrien Skies/Valkyrien Warfare (%s) cannot run directly in single-player mode. You must run it on a server (Termux can be used), otherwise the game will crash.</string>
@@ -227,10 +227,10 @@
     <string name="mod_forge_searching">Searching for Forge version number</string>
     <string name="mod_neoforge_searching">Searching for NeoForge version number</string>
     <string name="mod_optifine_progress">Downloading %s</string>
-    <string name="modpack_download_applying_overrides">Applying overrides (%d/%d)</string>
-    <string name="modpack_download_downloading_metadata">Downloading modpack metadata (%.2fMB / %.2fMB, speed: %s/s)</string>
-    <string name="modpack_download_downloading_mods">Downloading mods (%.2fMB / %.2fMB, speed: %s/s)</string>
-    <string name="modpack_download_downloading_mods_fc">Downloading mods (Downloaded files: %d (%s), Total files: %d, Speed: %s/s)</string>
+    <string name="modpack_download_applying_overrides">Applying overrides (%1$d/%2$d)</string>
+    <string name="modpack_download_downloading_metadata">Downloading modpack metadata (%1$.2fMB / %2$.2fMB, speed: %3$s/s)</string>
+    <string name="modpack_download_downloading_mods">Downloading mods (%1$.2fMB / %2$.2fMB, speed: %3$s/s)</string>
+    <string name="modpack_download_downloading_mods_fc">Downloading mods (Downloaded files: %1$d (%2$s), Total files: %3$d, Speed: %4$s/s)</string>
     <string name="modpack_install_download_failed">Failed to download modpack file</string>
     <string name="modpack_prepare_mod_loader_installation">All mods have been installed, preparing to install mod loader</string>
     <string name="mouse_settings_speed_name">Virtual Mouse Speed</string>
@@ -259,10 +259,10 @@
     <string name="newbie_guide_mod_import">Select a Mod file in the native file manager to import it into the current Mod folder.</string>
     <string name="newbie_guide_mod_search">Click to summon a search box and use it to quickly find the Mod you\'re looking for.</string>
     <string name="newbie_guide_mouse_import">Click to open the native file manager, select your virtual mouse image file, and import it into the launcher!</string>
-    <string name="newdl_downloading_game_files">Downloading game files… (%d/%d, %.2f MB)</string>
-    <string name="newdl_downloading_game_files_size">Downloading game files… (%.2f/%.2f MB, %.2f MB/s)</string>
+    <string name="newdl_downloading_game_files">Downloading game files… (%1$d/%2$d, %3$.2f MB)</string>
+    <string name="newdl_downloading_game_files_size">Downloading game files… (%1$.2f/%2$.2f MB, %3$.2f MB/s)</string>
     <string name="newdl_downloading_metadata">Downloading game metadata (%s)</string>
-    <string name="newdl_extracting_native_libraries">Extracting native libraries (%d/%d)</string>
+    <string name="newdl_extracting_native_libraries">Extracting native libraries (%1$d/%2$d)</string>
     <string name="newdl_starting">Reading game metadata…</string>
     <string name="no_minecraft_purchase">Please ensure you have purchased Minecraft, log in to your account on https://minecraft.net/ and try again</string>
     <string name="notif_channel_name">General</string>
@@ -271,7 +271,7 @@
     <string name="notif_error_occured">An error occurred</string>
     <string name="notif_error_occured_desc">Click to view details</string>
     <string name="notification_game_runs">The game is running!</string>
-    <string name="notification_permission_dialog_text">%s requires notification permission to prevent game file downloads from stopping when you leave the app. Without this permission, Android may stop your download progress when %s is in the background.</string>
+    <string name="notification_permission_dialog_text">%1$s requires notification permission to prevent game file downloads from stopping when you leave the app. Without this permission, Android may stop your download progress when %2$s is in the background.</string>
     <string name="notification_permission_dialog_title">Permission Request</string>
     <string name="notification_permission_toast">You can change your mind at any time by going to \"System Settings\"</string>
     <string name="notification_terminate">Terminate</string>
@@ -301,7 +301,7 @@
     <string name="pedit_reset_icon">This will reset the custom icon you set, and the operation is irreversible. Are you sure you want to reset the version icon?</string>
     <string name="pedit_unsaved_tip">You have made modifications to this version configuration. Returning directly will lose these changes. Are you sure you want to return directly?</string>
     <string name="permissions_manage_external_storage">%s requires permission to manage all files on the device to use this feature properly. Please enable the permission!</string>
-    <string name="permissions_storage_for_renderer_config">The selected renderer plugin %s may have settings. If %s lacks storage access, its settings cannot be read. Grant permission for proper function.</string>
+    <string name="permissions_storage_for_renderer_config">The selected renderer plugin %1$s may have settings. If %2$s lacks storage access, its settings cannot be read. Grant permission for proper function.</string>
     <string name="permissions_write_external_storage">%s requires storage management permission. If the permission is not enabled, it may cause issues such as game files failing to save or decompress properly. Please grant the permission to ensure proper functionality.</string>
     <string name="profile_mods_add_mod">Add Mod</string>
     <string name="profile_mods_added_mod">Successfully Added Mod</string>
@@ -320,7 +320,7 @@
     <string name="request_sponsorship_message">Most of the content in this software is developed and maintained by me alone. If you find this software helpful and are in a position to do so, I hope you will consider sponsoring me to give me more motivation to continue developing and improving it. Thank you for your support!</string>
     <string name="request_sponsorship_title">Support My Development</string>
     <string name="search_count">%d search results</string>
-    <string name="select_modpack_local_installing_files">Installing game files… (%d / %d)</string>
+    <string name="select_modpack_local_installing_files">Installing game files… (%1$d / %2$d)</string>
     <string name="select_modpack_local_not_supported">This modpack is not supported by the launcher! The launcher only supports importing modpacks in Modrinth, CurseForge, and MCBBS formats. Please check if your modpack is made according to the specified formats!</string>
     <string name="select_modpack_local_tip">Please select a modpack file that the launcher supports importing!</string>
     <string name="setting_category_control">Control settings</string>
@@ -336,7 +336,7 @@
     <string name="setting_gyro_invert_y_axis">Invert Y Axis</string>
     <string name="setting_gyro_sensitivity_title">Gyroscope Control Sensitivity</string>
     <string name="setting_java_memory_exceeded">The memory space set currently exceeds the available memory size</string>
-    <string name="setting_java_memory_info">Current memory usage: %s / %s, Free memory: %s</string>
+    <string name="setting_java_memory_info">Current memory usage: %1$s / %2$s, Free memory: %3$s</string>
     <string name="setting_longpress_trigger_title">Long Press Trigger Delay</string>
     <string name="setting_reboot_tip">This setting has been changed, but requires the app to be restarted to take effect!</string>
     <string name="setting_renderer_local_delete">Are you sure you want to delete this renderer plugin? This action cannot be undone!</string>
@@ -359,7 +359,7 @@
     <string name="update_dialog_file_size">Package Size:</string>
     <string name="update_dialog_time">Date:</string>
     <string name="update_dialog_version">Version:</string>
-    <string name="update_downloading">Downloading installation package… (%s / %s)</string>
+    <string name="update_downloading">Downloading installation package… (%1$s / %2$s)</string>
     <string name="update_downloading_tip">Fetching, update source: %s</string>
     <string name="update_fail">Network error, unable to check for updates at the moment!</string>
     <string name="update_fail_code">Network error, unable to check for updates at the moment! Error code: %d</string>

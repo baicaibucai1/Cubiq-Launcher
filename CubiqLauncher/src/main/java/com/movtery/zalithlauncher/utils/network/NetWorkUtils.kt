@@ -43,6 +43,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
@@ -201,26 +202,25 @@ suspend fun fetchStringFromUrl(url: String): String = withContext(Dispatchers.IO
  * @throws IOException 当网络请求失败或响应解析失败时
  */
 @Throws(IOException::class, IllegalArgumentException::class)
-suspend fun fetchStringFromUrls(urls: List<String>): String = withContext(Dispatchers.IO) {
-    var result: String? = null
-    var succeed = false
-    var lastException: Throwable? = null
+suspend fun fetchStringFromUrls(urls: List<String>): String = fetchStringFromUrls(urls) { it }
 
-    loop@ for (url in urls) {
-        runCatching {
-            result = fetchStringFromUrl(url)
-            succeed = true
-            break@loop
-        }.onFailure { th ->
-            if (th is CancellationException || th.isInterruptedIOException()) throw th
-            Logger.debug(TAG, "Source $url failed!", th)
-            lastException = th
+/** Malformed or invalid content is a source failure, just like an HTTP error. */
+internal suspend fun <T> fetchStringFromUrls(
+    urls: List<String>,
+    parse: (String) -> T
+): T = withContext(Dispatchers.IO) {
+    var lastException: Exception? = null
+    for (url in urls) {
+        ensureActive()
+        try {
+            return@withContext parse(fetchStringFromUrl(url))
+        } catch (e: Exception) {
+            if (e is CancellationException || e.isInterruptedIOException()) throw e
+            Logger.debug(TAG, "Source $url failed!", e)
+            lastException = e
         }
     }
-
-    if (!succeed || result == null) throw lastException ?: IOException("Failed to retrieve information from the source!")
-
-    result
+    throw lastException ?: IOException("No download sources configured")
 }
 
 /**

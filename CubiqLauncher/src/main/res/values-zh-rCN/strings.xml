@@ -69,7 +69,7 @@
     <!--  单位  -->
     <string name="unit_day">天</string>
     <string name="date_format">yyyy \'年\' MM \'月\' dd \'日\' HH:mm:ss</string>
-    <string name="duration_format">%s 天 %s 小时 %s 分钟</string>
+    <string name="duration_format">%1$s 天 %2$s 小时 %3$s 分钟</string>
     <string name="just_now">刚刚</string>
     <string name="minutes_ago">%d 分钟前</string>
     <string name="hours_ago">%d 小时前</string>
@@ -615,7 +615,7 @@
     <string name="files_select_dir">选择此目录</string>
     <string name="files_current_path">当前路径：%s</string>
     <string name="files_no_selectable_content">该目录没有可选内容</string>
-    <string name="file_invalid_length">名称过长！(当前长度：%d，最大长度：%d)</string>
+    <string name="file_invalid_length">名称过长！(当前长度：%1$d，最大长度：%2$d)</string>
     <string name="file_invalid_leading_or_trailing_space">不能以空格开头或结尾！</string>
     <!--  Jre  -->
     <string name="multirt_runtime_corrupt">Java 运行环境损坏</string>
@@ -1078,10 +1078,14 @@
     <string name="settings_launcher_log_share_summary">点击以分享启动器的日志文件，以供开发者定位并修复启动器的问题</string>
     <string name="settings_launcher_log_share_packing">打包启动器日志文件</string>
     <string name="settings_launcher_mirror_game_source_title">游戏内容下载源</string>
-    <string name="settings_launcher_mirror_asset_platform_source_title">资源平台下载源</string>
-    <string name="settings_launcher_mirror_auto">自动</string>
-    <string name="settings_launcher_mirror_official">尽量使用官方源</string>
-    <string name="settings_launcher_mirror_mirror">尽量使用镜像源</string>
+    <string name="settings_launcher_mirror_asset_platform_source_title">模组与资源下载源</string>
+    <string name="settings_launcher_mirror_auto">自动选择</string>
+    <string name="settings_launcher_mirror_official">仅使用官方源</string>
+    <string name="settings_launcher_mirror_mirror">国内镜像优先</string>
+    <string name="settings_launcher_mirror_named">国内镜像优先（%1$s）</string>
+    <string name="settings_launcher_mirror_game_summary">BMCLAPI 提供 Minecraft 版本列表、游戏文件和部分模组加载器的镜像。镜像不可用时会尝试官方源。</string>
+    <string name="settings_launcher_mirror_asset_summary">MCIM 提供 Modrinth 和 CurseForge 的模组、整合包等资源镜像。镜像不可用时会尝试官方平台。</string>
+    <string name="settings_launcher_mirror_auto_summary">自动模式在中国大陆优先使用镜像。</string>
     <string name="settings_launcher_background_title">启动器背景</string>
     <string name="settings_launcher_background_summary">选择一张图片或者一则视频作为启动器的背景</string>
     <string name="settings_launcher_background_importing">导入启动器背景文件中</string>
@@ -1476,4 +1480,26 @@
     <string name="guide_editor_save">完成编辑后，记得保存控制布局！</string>
     <string name="guide_tip_blank">点击空白处进入下一步</string>
     <string name="guide_tip_finish">点击空白处完成引导</string>
+
+    <!-- 物理键鼠与录屏 -->
+    <string name="settings_tab_keyboard_mouse">键盘与鼠标</string>
+    <string name="settings_km_mouse_category">物理鼠标</string>
+    <string name="settings_km_mouse_capture_title">捕获鼠标指针</string>
+    <string name="settings_km_mouse_capture_summary">锁定物理鼠标指针，让游戏内的鼠标操作接近电脑端。</string>
+    <string name="settings_km_sensitivity_title">鼠标指针灵敏度</string>
+    <string name="settings_km_sensitivity_summary">调整捕获物理鼠标后指针的移动灵敏度。</string>
+    <string name="settings_km_hide_cursor_title">隐藏虚拟指针</string>
+    <string name="settings_km_hide_cursor_summary">使用物理鼠标时隐藏屏幕上的虚拟指针。</string>
+    <string name="settings_km_keyboard_category">物理键盘</string>
+    <string name="settings_km_ime_key_title">软键盘切换键</string>
+    <string name="settings_km_ime_key_summary">设置在游戏内打开或关闭软键盘的按键。</string>
+    <string name="settings_km_capture_tools_category">录屏与截图</string>
+    <string name="settings_km_recorder_hud_title">录屏与截图浮窗</string>
+    <string name="settings_km_recorder_hud_summary">在游戏内显示浮动工具栏，方便随时录屏或截图。</string>
+    <string name="settings_km_capture_sound_title">截图快门声</string>
+    <string name="settings_km_capture_sound_summary">截图时播放快门声。</string>
+    <string name="settings_km_save_gallery_title">保存至系统相册</string>
+    <string name="settings_km_save_gallery_summary">将截图和录屏自动保存至 Android 的 Pictures 和 Movies 目录。</string>
+    <string name="settings_km_timer_title">显示录制计时</string>
+    <string name="settings_km_timer_summary">录屏时实时显示已录制的时长。</string>
 </resources>

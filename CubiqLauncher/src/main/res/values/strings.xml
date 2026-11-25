@@ -69,7 +69,7 @@
     <!-- Unit -->
     <string name="unit_day">day</string>
     <string name="date_format">MMM d, yyyy, h:mm:ss a</string>
-    <string name="duration_format">%s Days %s Hours %s Minutes</string>
+    <string name="duration_format">%1$s Days %2$s Hours %3$s Minutes</string>
     <string name="just_now">just now</string>
     <string name="minutes_ago">%d minutes ago</string>
     <string name="hours_ago">%d hours ago</string>
@@ -616,7 +616,7 @@
     <string name="files_select_dir">Select Folder</string>
     <string name="files_current_path">Current path: %s</string>
     <string name="files_no_selectable_content">No selectable content</string>
-    <string name="file_invalid_length">Name too long! (Current: %d, Max: %d)</string>
+    <string name="file_invalid_length">Name too long! (Current: %1$d, Max: %2$d)</string>
     <string name="file_invalid_leading_or_trailing_space">Cannot start or end with a space!</string>
     <!-- Java Runtime -->
     <string name="multirt_runtime_corrupt">Corrupted Java runtime</string>
@@ -1100,9 +1100,13 @@
     <string name="settings_launcher_log_share_packing">Package launcher log files</string>
     <string name="settings_launcher_mirror_game_source_title">Game Download Source</string>
     <string name="settings_launcher_mirror_asset_platform_source_title">Mod Download Source</string>
-    <string name="settings_launcher_mirror_auto">Auto</string>
-    <string name="settings_launcher_mirror_official">From Official Sources</string>
-    <string name="settings_launcher_mirror_mirror">From Mirror</string>
+    <string name="settings_launcher_mirror_auto">Automatic</string>
+    <string name="settings_launcher_mirror_official">Official source only</string>
+    <string name="settings_launcher_mirror_mirror">Prefer domestic mirrors</string>
+    <string name="settings_launcher_mirror_named">Prefer %1$s (China mirror)</string>
+    <string name="settings_launcher_mirror_game_summary">BMCLAPI mirrors the Minecraft version list, game files and supported mod loaders. When unavailable, the launcher tries the official source.</string>
+    <string name="settings_launcher_mirror_asset_summary">MCIM mirrors supported Modrinth and CurseForge requests. When unavailable, the launcher tries the official platform.</string>
+    <string name="settings_launcher_mirror_auto_summary">Automatic mode prefers the mirror in mainland China.</string>
     <string name="settings_launcher_background_title">Launcher Background</string>
     <string name="settings_launcher_background_summary">Choose an image or video as the launcher background</string>
     <string name="settings_launcher_background_importing">Importing launcher background file</string>

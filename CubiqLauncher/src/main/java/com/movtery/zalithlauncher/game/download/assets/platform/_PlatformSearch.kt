@@ -19,20 +19,18 @@
 package com.movtery.zalithlauncher.game.download.assets.platform
 
 import android.util.Log
-import com.movtery.zalithlauncher.game.addons.mirror.MirrorPriority
-import com.movtery.zalithlauncher.game.addons.mirror.resolveMirrorPriority
+import com.movtery.zalithlauncher.game.addons.mirror.orderCandidates
 import com.movtery.zalithlauncher.game.download.assets.mapExceptionToMessage
 import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.CurseForgeSearcher
 import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.MCIM_CURSEFORGE_API
 import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.models.CurseForgeFile
+import com.movtery.zalithlauncher.game.download.assets.platform.mcim.assetPlatformPriority
 import com.movtery.zalithlauncher.game.download.assets.platform.modrinth.MCIM_MODRINTH_API
 import com.movtery.zalithlauncher.game.download.assets.platform.modrinth.ModrinthSearcher
 import com.movtery.zalithlauncher.game.download.assets.platform.modrinth.models.ModrinthVersion
 import com.movtery.zalithlauncher.game.download.assets.utils.localizedModSearchKeywords
-import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.elements.DownloadAssetsState
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.elements.SearchAssetsState
-import com.movtery.zalithlauncher.utils.isChinaMainland
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.isInterruptedIOException
 import kotlinx.coroutines.CancellationException
@@ -42,7 +40,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.IOException
 
 private const val TAG = "PlatformSearch"
@@ -82,14 +79,9 @@ suspend fun <E: AbstractPlatformSearcher, T> mirroredPlatformSearcher(
             Log.w("PlatformSearcher", "Failed to perform the operation on source: {${searcher.source}}", e)
             lastException = e
 
-            if (e.isInterruptedIOException()) {
-                throw e
-            } else if (e is FileNotFoundException) {
-                errors.add(e)
-                break
-            } else {
-                errors.add(e)
-            }
+            if (e is CancellationException || e.isInterruptedIOException()) throw e
+            // A mirror may not have synchronized a file yet, even if the origin has it.
+            errors.add(e)
         }
     }
 
@@ -106,35 +98,11 @@ suspend fun <E: AbstractPlatformSearcher, T> mirroredPlatformSearcher(
     throw lastException ?: IllegalStateException("Should not have executed to this stage.")
 }
 
-/**
- * 镜像源只能在中国地区使用
- */
-fun mirroredCurseForgeSource(
-    enabledMirror: Boolean = isChinaMainland()
-): List<CurseForgeSearcher> {
-    val source = resolveMirrorPriority(AllSettings.assetPlatformSource.getValue(), mainland = enabledMirror)
-    val mirrorSource = mirrorCurseForgeSearcher.takeIf { enabledMirror }
-    return when (source) {
-        MirrorPriority.OFFICIAL -> listOf(curseForgeSearcher)
-        MirrorPriority.MIRROR_FIRST ->
-            listOfNotNull(mirrorSource, curseForgeSearcher)
-    }
-}
+fun mirroredCurseForgeSource(): List<CurseForgeSearcher> =
+    orderCandidates(curseForgeSearcher, mirrorCurseForgeSearcher, assetPlatformPriority())
 
-/**
- * 镜像源只能在中国地区使用
- */
-fun mirroredModrinthSource(
-    enabledMirror: Boolean = isChinaMainland()
-): List<ModrinthSearcher> {
-    val source = resolveMirrorPriority(AllSettings.assetPlatformSource.getValue(), mainland = enabledMirror)
-    val mirrorSource = mirrorModrinthSearcher.takeIf { enabledMirror }
-    return when (source) {
-        MirrorPriority.OFFICIAL -> listOf(modrinthSearcher)
-        MirrorPriority.MIRROR_FIRST ->
-            listOfNotNull(mirrorSource, modrinthSearcher)
-    }
-}
+fun mirroredModrinthSource(): List<ModrinthSearcher> =
+    orderCandidates(modrinthSearcher, mirrorModrinthSearcher, assetPlatformPriority())
 
 suspend fun searchAssets(
     searchPlatform: Platform,
@@ -183,8 +151,10 @@ suspend fun searchAssets(
                 }
                 lastResult = r
                 if (r.getAssetsPage(platformClasses).data.isNotEmpty()) break
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                //当前关键词搜索失败，记录异常并继续尝试下一个
+                // 当前关键词搜索失败，记录异常并继续尝试下一个。
                 lastException = e
             }
         }

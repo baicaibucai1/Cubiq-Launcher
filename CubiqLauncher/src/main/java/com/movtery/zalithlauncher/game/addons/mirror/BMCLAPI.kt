@@ -26,21 +26,21 @@ private const val ROOT = "https://bmclapi2.bangbang93.com"
 enum class BMCLAPI(val url: String) {
     BASE_URL(ROOT),
     MAVEN("$ROOT/maven"),
-    ASSETS("$ROOT/assets"),
-    LIBRARIES("$ROOT/libraries")
+    ASSETS("$ROOT/assets")
 }
 
 /**
  * [Modified from HMCL](https://github.com/HMCL-dev/HMCL/blob/9aa1367/HMCLCore/src/main/java/org/jackhuang/hmcl/download/BMCLAPIDownloadProvider.java#L64-L83)
  */
 private val REPLACE_MIRROR_HOLDERS = mapOf(
-    Pair(BMCLAPI.BASE_URL.url, BMCLAPI.BASE_URL.url),
     Pair("https://launchermeta.mojang.com", BMCLAPI.BASE_URL.url),
+    Pair("http://launchermeta.mojang.com", BMCLAPI.BASE_URL.url),
     Pair("https://piston-meta.mojang.com", BMCLAPI.BASE_URL.url),
     Pair("https://piston-data.mojang.com", BMCLAPI.BASE_URL.url),
     Pair("https://launcher.mojang.com", BMCLAPI.BASE_URL.url),
-    Pair("https://libraries.minecraft.net", BMCLAPI.LIBRARIES.url),
+    Pair("https://libraries.minecraft.net", BMCLAPI.MAVEN.url),
     Pair("https://resources.download.minecraft.net", BMCLAPI.ASSETS.url),
+    Pair("http://resources.download.minecraft.net", BMCLAPI.ASSETS.url),
     Pair("http://files.minecraftforge.net/maven", BMCLAPI.MAVEN.url),
     Pair("https://files.minecraftforge.net/maven", BMCLAPI.MAVEN.url),
     Pair("https://maven.minecraftforge.net", BMCLAPI.MAVEN.url),
@@ -56,23 +56,14 @@ private val REPLACE_MIRROR_HOLDERS = mapOf(
     Pair("https://hmcl-dev.github.io/metadata/cleanroom", "https://alist.8mi.tech/d/mirror/HMCL-Metadata/Auto/cleanroom")
 )
 
-/**
- * 替换为镜像源链接并按用户偏好排序；即使在非中国大陆地区也保留镜像备用，防止官方源超时失败。
- */
-fun String.mapBMCLMirrorUrls(): List<String> {
-    val mirrorUrl = REPLACE_MIRROR_HOLDERS.entries.firstOrNull { (origin, _) ->
-        this.startsWith(origin)
-    }?.let { (origin, mirror) ->
-        replaceFirst(origin, mirror)
-    }
+internal fun gameDownloadPriority(): MirrorPriority =
+    resolveMirrorPriority(AllSettings.gameDownloadSource.getValue(), mainland = isChinaMainland())
 
-    val source = AllSettings.gameDownloadSource.getValue()
-    return when (source) {
-        com.movtery.zalithlauncher.setting.enums.MirrorSourceType.OFFICIAL -> listOfNotNull(this, mirrorUrl)
-        com.movtery.zalithlauncher.setting.enums.MirrorSourceType.AUTO -> {
-            if (isChinaMainland()) listOfNotNull(mirrorUrl, this)
-            else listOfNotNull(this, mirrorUrl)
-        }
-        else -> listOfNotNull(mirrorUrl, this)
+/** 为已知的游戏文件域名生成 BMCLAPI 候选地址。 */
+fun String.mapBMCLMirrorUrls(priority: MirrorPriority = gameDownloadPriority()): List<String> {
+    if (priority == MirrorPriority.OFFICIAL) return listOf(this)
+    val mirrorUrl = REPLACE_MIRROR_HOLDERS.entries.firstNotNullOfOrNull { (origin, mirror) ->
+        replaceDownloadUrlPrefix(origin, mirror)
     }
+    return orderCandidates(this, mirrorUrl, priority)
 }

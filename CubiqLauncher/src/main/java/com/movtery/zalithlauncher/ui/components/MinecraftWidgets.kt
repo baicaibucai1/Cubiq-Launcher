@@ -5,6 +5,8 @@
 
 package com.movtery.zalithlauncher.ui.components
 
+import androidx.compose.ui.res.stringResource
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -324,7 +326,7 @@ fun MinecraftPixelDonutSpinner(
 ) {
     AsyncImage(
         model = R.drawable.mc_loading_spinner,
-        contentDescription = "Loading",
+        contentDescription = stringResource(R.string.generic_loading),
         modifier = modifier.size(size)
     )
 }
@@ -368,12 +370,12 @@ fun MinecraftBlockCard(
 
 /**
  * 1:1 Replica of the Minecraft PC Mobile Launcher Bottom Navigation Bar
- * Options: News | Versions | Mods | Settings
+ * Options: Play | Mods | Settings
  * Matches Image 1: Light Grey PC Launcher tabs with 3D bottom bevels and Green active tab
  */
 @Composable
 fun MinecraftPCBottomNavBar(
-    selectedItem: Int, // 0: News, 1: Versions, 2: Mods, 3: Settings
+    selectedItem: Int, // 1: Play, 2: Mods, 3: Settings
     onItemSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
     barHeight: Dp = 58.dp,
@@ -396,23 +398,6 @@ fun MinecraftPCBottomNavBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(3.dp)
         ) {
-            // 0: News
-            MinecraftPCNavItem(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                icon = { isSel ->
-                    Image(
-                        painter = painterResource(R.drawable.ic_mc_pc_news),
-                        contentDescription = "News",
-                        modifier = Modifier.size(26.dp)
-                    )
-                },
-                label = "News",
-                isSelected = selectedItem == 0,
-                onClick = { onItemSelected(0) }
-            )
-
             // 1: Play
             MinecraftPCNavItem(
                 modifier = Modifier
@@ -421,11 +406,11 @@ fun MinecraftPCBottomNavBar(
                 icon = { isSel ->
                     Image(
                         painter = painterResource(R.drawable.ic_mc_pc_versions),
-                        contentDescription = "Play",
+                        contentDescription = stringResource(R.string.cubiq_home_play_title),
                         modifier = Modifier.size(26.dp)
                     )
                 },
-                label = "Play",
+                label = stringResource(R.string.cubiq_home_play_title),
                 isSelected = selectedItem == 1,
                 onClick = { onItemSelected(1) }
             )
@@ -438,11 +423,11 @@ fun MinecraftPCBottomNavBar(
                 icon = { isSel ->
                     Image(
                         painter = painterResource(R.drawable.ic_mc_pc_mods),
-                        contentDescription = "Mods",
+                        contentDescription = stringResource(R.string.cubiq_home_mods),
                         modifier = Modifier.size(26.dp)
                     )
                 },
-                label = "Mods",
+                label = stringResource(R.string.cubiq_home_mods),
                 isSelected = selectedItem == 2,
                 onClick = { onItemSelected(2) }
             )
@@ -455,13 +440,13 @@ fun MinecraftPCBottomNavBar(
                 icon = { isSel ->
                     Image(
                         painter = painterResource(R.drawable.ic_mc_pc_profile),
-                        contentDescription = "Settings",
+                        contentDescription = stringResource(R.string.cubiq_home_settings),
                         modifier = Modifier
                             .size(26.dp)
                             .clip(RoundedCornerShape(2.dp))
                     )
                 },
-                label = "Settings",
+                label = stringResource(R.string.cubiq_home_settings),
                 isSelected = selectedItem == 3,
                 onClick = { onItemSelected(3) }
             )
@@ -643,9 +628,10 @@ fun MinecraftLinearProgressBar(
 
 @Composable
 fun MinecraftLoadingBlock(
-    message: String = "LOADING...",
+    message: String? = null,
     modifier: Modifier = Modifier
 ) {
+    val displayMessage = message ?: stringResource(R.string.cubiq_home_loading_text)
     Column(
         modifier = modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -656,7 +642,7 @@ fun MinecraftLoadingBlock(
             height = 8.dp
         )
         Text(
-            text = message,
+            text = displayMessage,
             color = Color(0xFFAAAAAA),
             fontFamily = MinecraftFontFamily,
             fontSize = 11.5.sp,
@@ -670,7 +656,7 @@ fun MinecraftLoadingBlock(
 fun MinecraftLoadingBlock(
     modifier: Modifier
 ) {
-    MinecraftLoadingBlock(message = "LOADING...", modifier = modifier)
+    MinecraftLoadingBlock(message = null, modifier = modifier)
 }
 
 

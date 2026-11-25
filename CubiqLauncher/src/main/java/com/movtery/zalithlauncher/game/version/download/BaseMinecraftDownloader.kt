@@ -53,10 +53,7 @@ class BaseMinecraftDownloader(
     val librariesTarget = File(getLibrariesHome(gameHome)).ensureDirectory()
     val assetIndexTarget = File(assetsTarget, "indexes").ensureDirectory()
 
-    suspend fun findVersion(version: String): Version? {
-        val versionManifest = MinecraftVersions.getVersionManifest()
-        return versionManifest.versions.find { it.id == version }
-    }
+    suspend fun findVersion(version: String): Version? = MinecraftVersions.getVersionEntry(version)
 
     fun getVersionJsonPath(version: String, mcFolder: File = versionsTarget) =
         File(mcFolder, "$version/$version.json".replace("/", File.separator)).ensureParentDirectory()

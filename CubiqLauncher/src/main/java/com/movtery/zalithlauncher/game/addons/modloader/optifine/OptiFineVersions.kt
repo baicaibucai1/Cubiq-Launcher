@@ -24,7 +24,6 @@ import com.movtery.zalithlauncher.game.addons.mirror.orderedByGameSourcePreferen
 import com.movtery.zalithlauncher.game.addons.mirror.runMirrorable
 import com.movtery.zalithlauncher.game.addons.modloader.ResponseTooShortException
 import com.movtery.zalithlauncher.path.GLOBAL_CLIENT
-import com.movtery.zalithlauncher.utils.isChinaMainland
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.safeBodyAsJson
 import com.movtery.zalithlauncher.utils.network.safeBodyAsText
@@ -44,7 +43,8 @@ object OptiFineVersions {
     private const val OPTIFINE_DOWNLOAD_URL = "$OPTIFINE_URL/downloads"
     private const val OPTIFINE_ADLOADX_URL = "$OPTIFINE_URL/adloadx"
 
-    private var cacheResult: List<OptiFineVersion>? = null
+    @Volatile private var officialVersions: List<OptiFineVersion>? = null
+    @Volatile private var mirrorVersions: List<OptiFineVersion>? = null
 
     /**
      * 获取 OptiFine 版本列表
@@ -53,25 +53,20 @@ object OptiFineVersions {
         force: Boolean = false,
         gameVersion: String
     ): List<OptiFineVersion>? = withContext(Dispatchers.IO) {
-        if (isChinaMainland()) {
-            runMirrorable(
-                listOf(fetchOfficialSource(force), fetchBMCLAPISource(force)).orderedByGameSourcePreference()
-            )
-        } else {
-            fetchOfficialVersions(force)
-        }?.filter {
-            it.inherit == gameVersion
+        val sources = listOf(fetchOfficialSource(force), fetchBMCLAPISource(force)).map { source ->
+            MirrorSource(source.type) { source.block()?.filter { it.inherit == gameVersion } }
         }
+        runMirrorable(sources.orderedByGameSourcePreference(), accept = { it.isNotEmpty() })
     }
 
-    private fun fetchOfficialSource(force: Boolean): MirrorSource<List<OptiFineVersion>?> =
+    private fun fetchOfficialSource(force: Boolean): MirrorSource<List<OptiFineVersion>> =
         MirrorSource(SourceType.OFFICIAL) { fetchOfficialVersions(force) }
 
-    private fun fetchBMCLAPISource(force: Boolean): MirrorSource<List<OptiFineVersion>?> =
+    private fun fetchBMCLAPISource(force: Boolean): MirrorSource<List<OptiFineVersion>> =
         MirrorSource(SourceType.BMCLAPI) { fetchListWithBMCLAPI(force) }
 
     private suspend fun fetchOfficialVersions(force: Boolean) = withContext(Dispatchers.Default) {
-        if (!force) cacheResult?.let { return@withContext it }
+        if (!force) officialVersions?.let { return@withContext it }
 
         try {
             val response: HttpResponse = withContext(Dispatchers.IO) {
@@ -146,7 +141,7 @@ object OptiFineVersions {
                     )
                 )
             }
-            cacheResult = versions
+            officialVersions = versions
             versions
         } catch(_: CancellationException) {
             Logger.debug(TAG, "Client cancelled.")
@@ -158,7 +153,7 @@ object OptiFineVersions {
     }
 
     private suspend fun fetchListWithBMCLAPI(force: Boolean): List<OptiFineVersion>? = withContext(Dispatchers.Default) {
-        if (!force) cacheResult?.let { return@withContext it }
+        if (!force) mirrorVersions?.let { return@withContext it }
 
             try {
                 val tokens: List<OptiFineVersionToken> = withContext(Dispatchers.IO) {
@@ -189,7 +184,7 @@ object OptiFineVersions {
                         isPreview = token.patch.contains("pre", ignoreCase = true)
                     )
                 }.also {
-                    cacheResult = it
+                    mirrorVersions = it
                 }
             } catch(_: CancellationException) {
                 Logger.debug(TAG, "Client cancelled.")

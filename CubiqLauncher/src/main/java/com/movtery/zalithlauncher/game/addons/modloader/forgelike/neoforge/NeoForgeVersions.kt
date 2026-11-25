@@ -24,17 +24,17 @@ import com.movtery.zalithlauncher.game.addons.mirror.orderedByGameSourcePreferen
 import com.movtery.zalithlauncher.game.addons.mirror.runMirrorable
 import com.movtery.zalithlauncher.game.addons.modloader.forgelike.neoforge.models.BMCLAPIMaven
 import com.movtery.zalithlauncher.game.addons.modloader.forgelike.neoforge.models.NeoForgedMaven
-import com.movtery.zalithlauncher.utils.isChinaMainland
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.httpGetJson
 import com.movtery.zalithlauncher.utils.network.withRetry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 
 object NeoForgeVersions {
     private const val TAG = "NeoForgeVersions"
-    private var cacheResult: List<NeoForgeVersion>? = null
+    private val versionsBySource = ConcurrentHashMap<SourceType, List<NeoForgeVersion>>()
 
     /**
      * 获取 NeoForge 版本列表
@@ -43,19 +43,14 @@ object NeoForgeVersions {
         force: Boolean = false,
         gameVersion: String
     ): List<NeoForgeVersion>? = withContext(Dispatchers.Default) {
-        if (!force) cacheResult?.let {
-            return@withContext it.outputVersionList(gameVersion)
+        val sources = listOf(fetchListWithOfficial(), fetchListWithBMCLAPI()).map { source ->
+            MirrorSource(source.type) {
+                val versions = if (force) null else versionsBySource[source.type]
+                (versions ?: source.block()?.also { versionsBySource[source.type] = it })
+                    ?.outputVersionList(gameVersion)
+            }
         }
-
-        if (isChinaMainland()) {
-            runMirrorable(
-                listOf(fetchListWithOfficial(), fetchListWithBMCLAPI()).orderedByGameSourcePreference()
-            )
-        } else {
-            fetchOfficialVersions()
-        }?.also {
-            cacheResult = it
-        }?.outputVersionList(gameVersion)
+        runMirrorable(sources.orderedByGameSourcePreference(), accept = { it.isNotEmpty() })
     }
 
     private fun List<NeoForgeVersion>.outputVersionList(
@@ -71,7 +66,7 @@ object NeoForgeVersions {
     /**
      * 在官方源获取版本列表
      */
-    private fun fetchListWithOfficial(): MirrorSource<List<NeoForgeVersion>?> = MirrorSource(
+    private fun fetchListWithOfficial(): MirrorSource<List<NeoForgeVersion>> = MirrorSource(
         type = SourceType.OFFICIAL
     ) {
         fetchOfficialVersions()
@@ -93,7 +88,7 @@ object NeoForgeVersions {
     /**
      * 在BMCL API源获取版本列表
      */
-    private fun fetchListWithBMCLAPI(): MirrorSource<List<NeoForgeVersion>?> = MirrorSource(
+    private fun fetchListWithBMCLAPI(): MirrorSource<List<NeoForgeVersion>> = MirrorSource(
         type = SourceType.BMCLAPI
     ) {
         processVersionList(SourceType.BMCLAPI) {

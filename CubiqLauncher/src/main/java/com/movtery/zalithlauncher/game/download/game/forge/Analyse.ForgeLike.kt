@@ -265,12 +265,13 @@ private suspend fun parseProcessors(
         val output = options["output"] ?: return@forEach
         Logger.info(TAG, "Patching DOWNLOAD_MOJMAPS task")
 
-        val versionManifest = MinecraftVersions.getVersionManifest()
-        versionManifest.versions.find { it.id == version }?.let { vanilla ->
+        MinecraftVersions.getVersionEntry(version)?.let { vanilla ->
             val manifest = withRetry(FORGE_LIKE_ANALYSE_ID, maxRetries = 2) {
-                fetchStringFromUrls(
-                    vanilla.url.mapBMCLMirrorUrls()
-                ).parseTo(GameManifest::class.java)
+                fetchStringFromUrls(vanilla.url.mapBMCLMirrorUrls()) { raw ->
+                    raw.parseTo(GameManifest::class.java).also {
+                        check(it.downloads?.clientMappings != null) { "client_mappings download info not found" }
+                    }
+                }
             }
             manifest.downloads?.clientMappings?.let { mappings ->
                 schedule(mappings.url.mapBMCLMirrorUrls(), mappings.sha1, File(output), mappings.size)

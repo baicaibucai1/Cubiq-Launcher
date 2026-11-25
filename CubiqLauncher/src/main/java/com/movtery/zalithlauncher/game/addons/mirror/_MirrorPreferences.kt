@@ -40,9 +40,17 @@ fun resolveMirrorPriority(source: MirrorSourceType, mainland: Boolean): MirrorPr
         else -> MirrorPriority.OFFICIAL
     }
 
-/** 按生效策略产出候选列表；官方档不注入镜像，镜像链接不存在时仅保留官方源 */
-fun orderCandidates(official: String, mirror: String?, priority: MirrorPriority): List<String> =
+/** 按偏好排序，且每个候选仅保留一次。 */
+internal fun <T : Any> orderCandidates(official: T, mirror: T?, priority: MirrorPriority): List<T> =
     when (priority) {
-        MirrorPriority.OFFICIAL -> listOfNotNull(official)
-        MirrorPriority.MIRROR_FIRST -> listOfNotNull(mirror, official)
+        MirrorPriority.OFFICIAL -> listOf(official)
+        MirrorPriority.MIRROR_FIRST -> listOfNotNull(mirror?.takeUnless { it == official }, official)
     }
+
+/** 只匹配完整域名或路径前缀，保留原 URL 的剩余路径和查询参数。 */
+internal fun String.replaceDownloadUrlPrefix(origin: String, mirror: String): String? {
+    if (!startsWith(origin)) return null
+    val boundary = getOrNull(origin.length)
+    if (boundary != null && boundary != '/' && boundary != '?' && boundary != '#') return null
+    return mirror + substring(origin.length)
+}

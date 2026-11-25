@@ -13,7 +13,6 @@ package com.movtery.zalithlauncher.ui.screens.content.elements
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
@@ -27,11 +26,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -60,7 +58,6 @@ import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.versioninfo.CubiqReleaseItem
 import com.movtery.zalithlauncher.ui.components.MinecraftButton
 import com.movtery.zalithlauncher.ui.components.MinecraftButtonStyle
-import com.movtery.zalithlauncher.ui.components.verticalScrollWithBar
 import com.movtery.zalithlauncher.ui.theme.MinecraftFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,7 +87,7 @@ fun CubiqUpdateDialog(
         if (isDownloading) return
         isDownloading = true
         downloadProgress = 0f
-        downloadStatusText = "Connecting..."
+        downloadStatusText = context.getString(R.string.cubiq_home_connecting)
         downloadError = null
 
         scope.launch(Dispatchers.IO) {
@@ -135,12 +132,12 @@ fun CubiqUpdateDialog(
                                 val mbTotal = contentLength / (1024f * 1024f)
                                 withContext(Dispatchers.Main) {
                                     downloadProgress = frac
-                                    downloadStatusText = "Downloading: ${(frac * 100).toInt()}% (%.1f MB / %.1f MB)".format(mbRead, mbTotal)
+                                    downloadStatusText = context.getString(R.string.cubiq_home_downloading_progress, (frac * 100).toInt(), mbRead, mbTotal)
                                 }
                             } else {
                                 val mbRead = totalRead / (1024f * 1024f)
                                 withContext(Dispatchers.Main) {
-                                    downloadStatusText = "Downloading: %.1f MB".format(mbRead)
+                                    downloadStatusText = context.getString(R.string.cubiq_home_downloading_size, mbRead)
                                 }
                             }
                         }
@@ -148,15 +145,18 @@ fun CubiqUpdateDialog(
                 }
 
                 withContext(Dispatchers.Main) {
-                    downloadStatusText = "Download complete! Opening installer..."
+                    downloadStatusText = context.getString(R.string.cubiq_home_download_complete_open_installer)
                     isDownloading = false
                     installApk(context, apkFile)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     isDownloading = false
-                    downloadError = e.localizedMessage ?: "Download failed"
-                    Toast.makeText(context, "In-app download failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    val message = e.localizedMessage?.takeIf { it.isNotBlank() }?.let {
+                        context.getString(R.string.cubiq_home_in_app_download_failed, it)
+                    } ?: context.getString(R.string.cubiq_home_download_failed)
+                    downloadError = message
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -204,7 +204,7 @@ fun CubiqUpdateDialog(
                         modifier = Modifier.size(13.dp)
                     )
                     Text(
-                        text = "Read / Download on GitHub",
+                        text = stringResource(R.string.cubiq_home_read_download_github),
                         color = Color(0xFF55FFFF),
                         fontFamily = MinecraftFontFamily,
                         fontSize = 10.5.sp,
@@ -232,7 +232,7 @@ fun CubiqUpdateDialog(
             // Header: Update Available
             Column {
                 Text(
-                    text = "NEW VERSION AVAILABLE",
+                    text = stringResource(R.string.cubiq_home_new_version_available),
                     color = Color(0xFF55FF55),
                     fontFamily = MinecraftFontFamily,
                     fontWeight = FontWeight.Bold,
@@ -248,50 +248,13 @@ fun CubiqUpdateDialog(
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Changelog container with slider
-            Text(
-                text = "CHANGELOG & RELEASE NOTES:",
-                color = Color(0xFFAAAAAA),
-                fontFamily = MinecraftFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 10.5.sp
-            )
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 200.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(Color(0xFF151517))
-                    .border(BorderStroke(1.dp, Color(0xFF2E2E30)), RoundedCornerShape(3.dp))
-                    .padding(horizontal = 10.dp, vertical = 8.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScrollWithBar(rememberScrollState())
-                ) {
-                    Text(
-                        text = release.body.ifBlank { "New version released with performance optimizations and bug fixes." },
-                        color = Color(0xFFE2E2E2),
-                        fontFamily = MinecraftFontFamily,
-                        fontSize = 11.sp,
-                        lineHeight = 16.sp
-                    )
-                }
-            }
-
             Spacer(modifier = Modifier.height(12.dp))
 
             // In-App Download Progress Area
             AnimatedVisibility(visible = isDownloading || downloadStatusText.isNotEmpty()) {
                 Column(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
                     Text(
-                        text = downloadStatusText,
+                        text = downloadError ?: downloadStatusText,
                         color = if (downloadError != null) Color(0xFFFF5555) else Color(0xFF55FF55),
                         fontFamily = MinecraftFontFamily,
                         fontSize = 11.sp
@@ -326,7 +289,7 @@ fun CubiqUpdateDialog(
                         }
                     },
                     style = MinecraftButtonStyle.GREEN,
-                    text = if (isDownloading) "DOWNLOADING..." else "⬇ DOWNLOAD UPDATE IN-APP",
+                    text = stringResource(if (isDownloading) R.string.cubiq_home_downloading else R.string.cubiq_home_download_update_in_app),
                     fontSize = 11.5.sp,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -342,7 +305,7 @@ fun CubiqUpdateDialog(
                             onDownloadNow(release.htmlUrl)
                         },
                         style = MinecraftButtonStyle.STONE,
-                        text = "READ / DOWNLOAD ON GITHUB",
+                        text = stringResource(R.string.cubiq_home_read_download_github),
                         fontSize = 10.5.sp,
                         modifier = Modifier
                             .weight(1f)
@@ -352,7 +315,7 @@ fun CubiqUpdateDialog(
                     MinecraftButton(
                         onClick = onNotNow,
                         style = MinecraftButtonStyle.STONE,
-                        text = "NOT NOW",
+                        text = stringResource(R.string.cubiq_home_not_now),
                         fontSize = 10.5.sp,
                         modifier = Modifier
                             .width(96.dp)
@@ -375,6 +338,7 @@ private fun installApk(context: Context, apkFile: File) {
         }
         context.startActivity(installIntent)
     }.onFailure { e ->
-        Toast.makeText(context, "Could not launch package installer: ${e.message}", Toast.LENGTH_LONG).show()
+        val reason = e.localizedMessage?.takeIf { it.isNotBlank() } ?: context.getString(R.string.cubiq_home_unknown_error)
+        Toast.makeText(context, context.getString(R.string.cubiq_home_install_package_error, reason), Toast.LENGTH_LONG).show()
     }
 }

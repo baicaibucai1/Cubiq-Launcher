@@ -43,8 +43,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 
 import androidx.compose.foundation.layout.Column
 
@@ -214,7 +212,7 @@ fun AboutInfoScreen(
 
                             title = BuildKeys.LAUNCHER_NAME,
 
-                            text = "v${BuildConfig.VERSION_NAME.removeSuffix("-debug")} (Release) • Unofficial Fork of Zalith Launcher 2",
+                            text = stringResource(R.string.cubiq_secondary_about_fork, BuildConfig.VERSION_NAME.removeSuffix("-debug")),
                             button = {
 
                                 Button(
@@ -245,7 +243,7 @@ fun AboutInfoScreen(
 
                         Text(
 
-                            text = "Notice: Cubiq Launcher is an unofficial version (fork) of Zalith Launcher 2, modified under the GNU General Public License v3.",
+                            text = stringResource(R.string.cubiq_secondary_about_notice),
 
                             style = MaterialTheme.typography.bodySmall,
 
@@ -257,170 +255,6 @@ fun AboutInfoScreen(
 
                 }
 
-            }
-
-
-
-            animatedItem(scope) { yOffset ->
-
-                ChunkLayout(
-
-                    modifier = Modifier.offset { IntOffset(x = 0, y = yOffset.roundToPx()) },
-
-                    title = "What's New in v1.2.0"
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "🎮 AUTHENTIC ZL1 CONTROLS & PARITY",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF55FF55)
-                        )
-                        Text(
-                            text = "• Authentic ZL1 Experience: The classic Zalith Launcher 1 controls layout, in-game drawer, and floating gear menu are back and fully tuned across both Java and Rust editions.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Pixel-Perfect Touch & Hotbar: Fixed touch desync on all scaled resolutions so your hotbar and button taps register instantly where you press.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Streamlined Control Engine: Paused experimental control experiments to deliver maximum stability and authentic, responsive controls.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "🎯 SILKY SMOOTH GYRO AIMING (NO MENU DRIFT)",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF55FF55)
-                        )
-                        Text(
-                            text = "• Zero Menu Drift: Gyroscope aiming now activates exclusively during active gameplay looking. Your cursor will never drift or glitch when opening inventory, chat, or pause menus.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Universal ZL1 Fusion Engine: Enjoy authentic rotation-vector sensor fusion with configurable sensitivity across all layouts.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "📱 PERFECT DISPLAY SCALING FOR ALL SCREENS",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF55FF55)
-                        )
-                        Text(
-                            text = "• Adaptive Screen Proportions: Whether you're on a compact Redmi 8, OnePlus, Google Pixel, Samsung Galaxy, or tablet, the portrait layout scales seamlessly with uniform margins and no oversized cards.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Refined Typography & Layout: Balanced Java Edition header logos, responsive action rows, and sharp installation badges.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "⚡ REAL DOWNLOAD ENGINE & BACKGROUND DOWNLOADS",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF55FF55)
-                        )
-                        Text(
-                            text = "• Real & Accurate Progress: Say goodbye to glitched numbers or downloaded MB exceeding total MB. All downloads now report real MBs, clamped progress, and live transfer rates.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Horizon Background Downloads: Horizon setup now features a dedicated 'Run in Background' option with real-time status in the compact bottom bar.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "📹 BUILT-IN SCREEN RECORDER & CAPTURE HUD",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF55FF55)
-                        )
-                        Text(
-                            text = "• Android 14 MediaProjection Service: Record high-framerate gameplay clips directly in-game without third-party apps failing or crashing.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Clean Organized Storage: Recordings save straight to Movies/Cubiq and screenshots to Pictures/Cubiq with saved notification alerts.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "🦀 MINECRAFT RUST EDITION (HORIZON 26.3)",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF55FF55)
-                        )
-                        Text(
-                            text = "• Direct Launch: Instant startup into Minecraft Rust with our custom black launch splash screen.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Dedicated Settings & Mods: Tune Vulkan/OpenGL renderers, resolution scaler, worker threads, and toggle .hmod mods directly in Cubiq.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• One-Tap Repair: Built-in 'Re-check files' to quickly verify engine tables and assets whenever needed.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "⚡ RENDERERS & PERFORMANCE",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF55FF55)
-                        )
-                        Text(
-                            text = "• 'Follow Global' Fix: Changing your profile renderer no longer overrides a version's 'Follow Global' setting on relaunch.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Full Renderer Library: Out-of-the-box support for LTW, Zink, Angle, VirGL, and MobileGlues with auto-detection and G1GC optimization.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "📦 DOWNLOADS HUB & MULTIPLAYER",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF55FF55)
-                        )
-                        Text(
-                            text = "• Restored Category Filter: Brought back the ZL2 Category dropdown (Multiplayer, Combat, Biomes, Dimensions, Optimization, etc.) in the landscape sidebar for Mods, Modpacks, and Resource Packs.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Skillora SMP Built-In: Added Skillora SMP (paid51.skilloraclouds.com:20015) to default multiplayer server presets.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Cleaner Capture Paths: In-game recordings save cleanly to Movies/Cubiq and screenshots to Pictures/Cubiq with saved path alerts.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "👤 ACCOUNTS & UI REFINEMENT",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF55FF55)
-                        )
-                        Text(
-                            text = "• Fast Ely.by Sign-in: Redesigned the Ely.by dialog for landscape, added direct register links, and made auth take 1-2 seconds with background skin caching.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Offline Session Fallback: If auth servers are down or tokens expire, easily skip refresh and launch right away.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "• Clean Hero Presentation: Single clean artwork card when one version is installed, and authentic 3D Steve icon in navigation.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
             }
 
 
@@ -843,7 +677,7 @@ private fun LinkIconItem(
 
                             painter = painterResource(R.drawable.ic_copyright_outlined),
 
-                            contentDescription = "License"
+                            contentDescription = stringResource(R.string.cubiq_secondary_about_license)
 
                         )
 
@@ -1217,7 +1051,7 @@ private fun LibraryInfoItem(
 
                         ),
 
-                        text = "Licensed under the ${info.license.name}",
+                        text = stringResource(R.string.cubiq_secondary_about_licensed, info.license.name),
 
                         style = MaterialTheme.typography.bodySmall.copy(
 

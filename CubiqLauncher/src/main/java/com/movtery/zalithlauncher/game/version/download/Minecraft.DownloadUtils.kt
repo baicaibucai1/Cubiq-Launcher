@@ -28,8 +28,10 @@ import com.movtery.zalithlauncher.utils.network.fetchStringFromUrls
 import com.movtery.zalithlauncher.utils.network.withRetry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import java.io.File
+import java.io.IOException
 
 private const val TAG = "Minecraft.DownloadUtils"
 
@@ -51,20 +53,18 @@ suspend fun <T> downloadAndParseJson(
     classOfT: Class<T>
 ): T {
     suspend fun downloadAndParse(): T {
-        val json = withContext(Dispatchers.IO) {
-            val string = withRetry(UTILS_LOG_TAG, maxRetries = 2) {
-                fetchStringFromUrls(
-                    url.mapBMCLMirrorUrls()
-                )
+        return withContext(Dispatchers.IO) {
+            val (rawJson, parsed) = withRetry(UTILS_LOG_TAG, maxRetries = 2) {
+                fetchStringFromUrls(url.mapBMCLMirrorUrls()) { json ->
+                    if (expectedSHA != null && !DigestUtils.sha1Hex(json).equals(expectedSHA, ignoreCase = true)) {
+                        throw IOException("Downloaded metadata does not match its SHA-1")
+                    }
+                    json to (json.parseTo(classOfT) ?: throw IOException("Missing JSON metadata"))
+                }
             }
-            if (string.isBlank()) {
-                Logger.error(TAG, "Downloaded string is empty, aborting.")
-                throw IllegalStateException("Downloaded string is empty.")
-            }
-            targetFile.writeText(string)
-            string
+            targetFile.writeText(rawJson)
+            parsed
         }
-        return json.parseTo(classOfT)
     }
 
     if (targetFile.exists()) {

@@ -2,9 +2,16 @@ package com.movtery.zalithlauncher.game.horizon
 
 import android.content.Context
 import android.content.Intent
+import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.account.AccountsManager
+import com.movtery.zalithlauncher.game.addons.mirror.gameDownloadPriority
+import com.movtery.zalithlauncher.game.addons.mirror.mapBMCLMirrorUrls
+import com.movtery.zalithlauncher.game.versioninfo.MinecraftVersions
 import com.movtery.zalithlauncher.utils.logging.Logger
+import com.movtery.zalithlauncher.utils.network.downloadFileFromSources
+import com.movtery.zalithlauncher.utils.network.fetchStringFromUrls
 import dev.horizon.android.HorizonActivity
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,15 +21,12 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
-import java.net.HttpURLConnection
-import java.net.URL
 import java.security.MessageDigest
 import java.util.zip.ZipFile
 
 object HorizonManager {
     const val VANILLA_VERSION = "26.3"
     const val PINNED_CLIENT_SHA1 = "e877b6a07acd633fb3bb475002175cec036e7b87"
-    const val VERSION_MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 
     private val WORLDGEN_TABLES = listOf(
         "noises" to "worldgen/noise",
@@ -204,12 +208,12 @@ object HorizonManager {
         targetDir.mkdirs()
 
         // 1. Unpack engine-data.zip tables
-        onProgress("Unpacking engine data tables...", 0.05f)
+        onProgress(context.getString(R.string.cubiq_horizon_engine_unpacking), 0.05f)
         unpackEngineData(context, targetDir)
         prepareEngineData(context)
 
         // 2. Extract client.jar assets and data preserving hierarchy
-        onProgress("Extracting Minecraft client assets & data...", 0.15f)
+        onProgress(context.getString(R.string.cubiq_horizon_extracting_assets), 0.15f)
         ZipFile(clientJar).use { zip ->
             val total = zip.size()
             var count = 0
@@ -229,14 +233,14 @@ object HorizonManager {
                 }
                 if (count % 400 == 0) {
                     val pct = 0.15f + 0.45f * (count.toFloat() / total.coerceAtLeast(1))
-                    onProgress("Extracting client assets ($count / $total)...", pct)
+                    onProgress(context.getString(R.string.cubiq_horizon_extracting_client_assets, count, total), pct)
                 }
             }
         }
 
         // 3. Rebuild aggregated tables
-        onProgress("Aggregating block tags and worldgen tables...", 0.65f)
-        rebuildAggregatedResources(targetDir) { step, pct ->
+        onProgress(context.getString(R.string.cubiq_horizon_aggregating_tables), 0.65f)
+        rebuildAggregatedResources(context, targetDir) { step, pct ->
             onProgress(step, 0.65f + 0.25f * pct)
         }
 
@@ -249,34 +253,34 @@ object HorizonManager {
         }
 
         // 5. Finalize metadata markers
-        onProgress("Finalizing metadata markers...", 0.95f)
+        onProgress(context.getString(R.string.cubiq_horizon_finalizing_metadata), 0.95f)
         File(targetDir, "android-downloads-v2.json").writeText("{\"schema\":2}", Charsets.UTF_8)
         File(targetDir, "audio-complete.json").writeText("{}", Charsets.UTF_8)
 
         Logger.info("HorizonManager", "Completed preparation of Horizon resources in ${targetDir.absolutePath}")
     }
 
-    private fun rebuildAggregatedResources(root: File, onStep: (String, Float) -> Unit) {
+    private fun rebuildAggregatedResources(context: Context, root: File, onStep: (String, Float) -> Unit) {
         val totalSteps = WORLDGEN_TABLES.size + ROOT_TAG_TABLES.size + 1
         var current = 0
 
         // Root tables (block-tags, damage-tags, damage-types)
         for ((name, source) in ROOT_TAG_TABLES) {
             current++
-            onStep("Building $name...", current.toFloat() / totalSteps)
+            onStep(context.getString(R.string.cubiq_horizon_building_table, name), current.toFloat() / totalSteps)
             aggregate(root, source, "$name.json")
         }
 
         // Worldgen tables
         for ((name, source) in WORLDGEN_TABLES) {
             current++
-            onStep("Building worldgen/$name...", current.toFloat() / totalSteps)
+            onStep(context.getString(R.string.cubiq_horizon_building_worldgen, name), current.toFloat() / totalSteps)
             aggregate(root, source, "worldgen/$name.json")
         }
 
         // Copy structure NBTs
         current++
-        onStep("Copying structure templates...", current.toFloat() / totalSteps)
+        onStep(context.getString(R.string.cubiq_horizon_copying_structures), current.toFloat() / totalSteps)
         val structureBase = File(root, "data/minecraft/structure")
         if (structureBase.exists() && structureBase.isDirectory) {
             val destBase = File(root, "worldgen/structure/minecraft")
@@ -365,50 +369,32 @@ object HorizonManager {
                     _installState.value = InstallState.Downloading(
                         currentBytes = 0,
                         totalBytes = 35_000_000L,
-                        currentItem = "Resolving Minecraft $VANILLA_VERSION...",
+                        currentItem = context.getString(R.string.cubiq_horizon_resolving_version, VANILLA_VERSION),
                         percent = 0.05f
                     )
 
-                    val manifestJson = JSONObject(fetchString(VERSION_MANIFEST_URL))
-                    val versions = manifestJson.getJSONArray("versions")
-                    var versionMetaUrl: String? = null
-                    for (i in 0 until versions.length()) {
-                        val v = versions.getJSONObject(i)
-                        if (v.getString("id") == VANILLA_VERSION) {
-                            versionMetaUrl = v.getString("url")
-                            break
+                    val priority = gameDownloadPriority()
+                    val versionMetaUrl = MinecraftVersions.getVersionEntry(VANILLA_VERSION, priority)?.url
+                        ?: throw IllegalStateException(context.getString(R.string.cubiq_horizon_failed_metadata))
+                    val (clientUrl, clientSize) = fetchStringFromUrls(versionMetaUrl.mapBMCLMirrorUrls(priority)) { raw ->
+                        val client = JSONObject(raw).getJSONObject("downloads").getJSONObject("client")
+                        check(client.getString("sha1").equals(PINNED_CLIENT_SHA1, ignoreCase = true)) {
+                            context.getString(R.string.cubiq_horizon_failed_metadata)
                         }
+                        client.getString("url") to client.getLong("size")
                     }
-                    if (versionMetaUrl == null) {
-                        for (i in 0 until versions.length()) {
-                            val v = versions.getJSONObject(i)
-                            if (v.getString("type") == "release") {
-                                versionMetaUrl = v.getString("url")
-                                break
-                            }
-                        }
-                    }
-                    if (versionMetaUrl == null) {
-                        throw IllegalStateException("Failed to resolve official Minecraft 26.3 metadata URL")
-                    }
-
-                    val versionMetaJson = JSONObject(fetchString(versionMetaUrl))
-                    val downloads = versionMetaJson.getJSONObject("downloads")
-                    val clientObj = downloads.getJSONObject("client")
-                    val clientUrl = clientObj.getString("url")
-                    val clientSize = clientObj.getLong("size")
 
                     val downloadedJar = File(stage, "client.jar")
                     var downloadedBytes = 0L
 
-                    downloadFileWithProgress(clientUrl, downloadedJar) { chunk ->
+                    downloadFileFromSources(clientUrl.mapBMCLMirrorUrls(priority), downloadedJar, PINNED_CLIENT_SHA1) { chunk ->
                         downloadedBytes += chunk
                         val safeBytes = if (clientSize > 0) downloadedBytes.coerceAtMost(clientSize) else downloadedBytes
                         val pct = if (clientSize > 0) (safeBytes.toFloat() / clientSize.toFloat()).coerceIn(0f, 1f) else 0f
                         _installState.value = InstallState.Downloading(
                             currentBytes = safeBytes,
                             totalBytes = clientSize,
-                            currentItem = "Minecraft $VANILLA_VERSION client.jar",
+                            currentItem = context.getString(R.string.cubiq_horizon_client_jar, VANILLA_VERSION),
                             percent = pct
                         )
                     }
@@ -416,7 +402,7 @@ object HorizonManager {
                 }
 
                 // Configuring / Preparing resources
-                _installState.value = InstallState.Configuring("Extracting textures and models...", 0.05f)
+                _installState.value = InstallState.Configuring(context.getString(R.string.cubiq_horizon_extracting_textures), 0.05f)
                 prepareResourcesFromJar(context, clientJar, stage) { step, pct ->
                     _installState.value = InstallState.Configuring(
                         currentStep = step,
@@ -432,9 +418,11 @@ object HorizonManager {
                 Logger.info("HorizonManager", "Setup completed successfully at ${targetDir.absolutePath}")
                 _installState.value = InstallState.Success
 
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.error("HorizonManager", "Setup failed: ${e.message}", e)
-                _installState.value = InstallState.Failed(e.message ?: "Unknown setup error")
+                _installState.value = InstallState.Failed(e.message ?: context.getString(R.string.cubiq_horizon_unknown_setup_error))
             }
         }
     }
@@ -743,38 +731,6 @@ object HorizonManager {
         }
         context.startActivity(intent)
         Logger.info("HorizonManager", "Launched HorizonActivity (:horizon process) with layout ${layoutFile.name}")
-    }
-
-    private fun fetchString(urlStr: String): String {
-        val url = URL(urlStr)
-        val conn = url.openConnection() as HttpURLConnection
-        conn.connectTimeout = 15000
-        conn.readTimeout = 15000
-        conn.instanceFollowRedirects = true
-        return conn.inputStream.bufferedReader().use { it.readText() }
-    }
-
-    private fun downloadFileWithProgress(urlStr: String, dest: File, onChunk: (Long) -> Unit) {
-        val url = URL(urlStr)
-        val conn = url.openConnection() as HttpURLConnection
-        conn.connectTimeout = 15000
-        conn.readTimeout = 15000
-        conn.instanceFollowRedirects = true
-
-        dest.parentFile?.mkdirs()
-        val temp = File(dest.parentFile, "${dest.name}.tmp")
-
-        conn.inputStream.use { input ->
-            FileOutputStream(temp).use { output ->
-                val buffer = ByteArray(8192)
-                var read: Int
-                while (input.read(buffer).also { read = it } != -1) {
-                    output.write(buffer, 0, read)
-                    onChunk(read.toLong())
-                }
-            }
-        }
-        temp.renameTo(dest)
     }
 
     fun calculateSha1(file: File): String {

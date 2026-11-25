@@ -18,8 +18,8 @@
 
 package com.movtery.zalithlauncher.game.addons.mirror
 
-import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.utils.logging.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -32,42 +32,32 @@ data class MirrorSource<T>(
     val block: suspend () -> T?
 )
 
-/**
- * 按顺序尝试各源，首个成功者胜出
- * 全部失败时抛出最后一次异常
- */
+/** 按顺序尝试。镜像没有结果或出错时，继续尝试官方源；不吞掉取消信号。 */
 suspend fun <T> runMirrorable(
-    sources: List<MirrorSource<T>>
+    sources: List<MirrorSource<T>>,
+    accept: (T) -> Boolean = { true }
 ): T? = withContext(Dispatchers.IO) {
-    var result: T? = null
-    var succeed = false
-    var lastException: Throwable? = null
-
-    loop@ for (source in sources) {
+    require(sources.isNotEmpty()) { "No download sources configured" }
+    for ((index, source) in sources.withIndex()) {
         ensureActive()
-
-        runCatching {
-            val res = source.block()
-            result = res
-            succeed = true
-            break@loop
-        }.onFailure {
-            Logger.debug(TAG, "Source ${source.type.displayName} failed!", it)
-            lastException = it
+        val isLast = index == sources.lastIndex
+        try {
+            val result = source.block()
+            ensureActive()
+            if (isLast || (result != null && accept(result))) return@withContext result
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (isLast) throw e
+            Logger.debug(TAG, "Source ${source.type.displayName} failed!", e)
         }
     }
-
-    if (!succeed) throw lastException ?: IOException("Failed to retrieve information from the source!")
-
-    result
+    throw IOException("Failed to retrieve information from the source!")
 }
 
-/**
- * 把官方在前、镜像在后的规范源列表按“游戏内容下载源”设置重排；
- * 自动档下大陆用户镜像优先，官方档仅保留官方源
- */
+/** 按“游戏内容下载源”设置重排。官方模式不访问镜像。 */
 fun <T> List<MirrorSource<T>>.orderedByGameSourcePreference(): List<MirrorSource<T>> =
-    when (resolveMirrorPriority(AllSettings.gameDownloadSource.getValue(), mainland = true)) {
+    when (gameDownloadPriority()) {
         MirrorPriority.OFFICIAL -> filter { it.type == SourceType.OFFICIAL }
-        MirrorPriority.MIRROR_FIRST -> reversed()
+        MirrorPriority.MIRROR_FIRST -> sortedBy { it.type == SourceType.OFFICIAL }
     }

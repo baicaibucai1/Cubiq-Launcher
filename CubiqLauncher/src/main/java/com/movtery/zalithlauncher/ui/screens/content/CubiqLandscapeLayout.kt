@@ -1,5 +1,7 @@
 package com.movtery.zalithlauncher.ui.screens.content
 
+import androidx.compose.ui.res.stringResource
+
 import com.movtery.zalithlauncher.setting.AllSettings
 
 import androidx.compose.ui.graphics.graphicsLayer
@@ -298,19 +300,11 @@ import com.movtery.zalithlauncher.ui.screens.content.minecraft.MinecraftModsScre
 
 
 
-import com.movtery.zalithlauncher.ui.screens.content.minecraft.MinecraftNewsScreen
-
-
-
 import com.movtery.zalithlauncher.ui.screens.content.minecraft.MinecraftProfileScreen
 
 
 
 import com.movtery.zalithlauncher.ui.screens.content.minecraft.MinecraftSkinsScreen
-
-
-
-import com.movtery.zalithlauncher.ui.screens.content.minecraft.MinecraftPatchNotesScreen
 
 
 
@@ -344,7 +338,7 @@ import com.movtery.zalithlauncher.ui.screens.content.horizon.HorizonSetupDialog
 
 
 
- * - Left vertical sidebar: Avatar, Username, Status, Play, Installations, Skins, Patch Notes, News, Versions, Mods, Settings
+ * - Left vertical sidebar: Avatar, Username, Status, Play, Installations, Skins, Mods, Settings
 
 
 
@@ -416,13 +410,7 @@ fun LandscapeLauncherLayout(
 
 
 
-    onLaunchGame: (Version?) -> Unit,
-
-
-
-    onOpenLink: (String) -> Unit
-
-
+    onLaunchGame: (Version?) -> Unit
 
 ) {
 
@@ -457,14 +445,6 @@ fun LandscapeLauncherLayout(
 
 
 
-    // 3: Patch Notes
-
-
-
-    // 4: News
-
-
-
     // 5: Mods
 
 
@@ -474,10 +454,6 @@ fun LandscapeLauncherLayout(
 
 
     val activeLandscapeIndex = when {
-
-
-
-        selectedBottomNav == 0 -> 4 // News
 
 
 
@@ -494,10 +470,6 @@ fun LandscapeLauncherLayout(
 
 
         selectedBottomNav == 1 && activeTab == 1 -> 2 // Skins
-
-
-
-        selectedBottomNav == 1 && activeTab == 2 -> 3 // Patch Notes
 
 
 
@@ -685,7 +657,7 @@ fun LandscapeLauncherLayout(
 
                         painter = painterResource(if (account != null) R.drawable.ic_mc_steve_head else R.drawable.ic_mc_pc_profile),
 
-                        contentDescription = "Player Face",
+                        contentDescription = stringResource(R.string.cubiq_home_player),
 
                         modifier = Modifier
 
@@ -703,7 +675,7 @@ fun LandscapeLauncherLayout(
 
                     Text(
 
-                        text = account?.username ?: "Player",
+                        text = account?.username ?: stringResource(R.string.cubiq_home_player),
 
                         color = Color.White,
 
@@ -721,7 +693,7 @@ fun LandscapeLauncherLayout(
 
                     Text(
 
-                        text = account?.let { "(${getAccountTypeName(it)})" } ?: "(No Active Account)",
+                        text = account?.let { "(${getAccountTypeName(it)})" } ?: stringResource(R.string.cubiq_home_no_active_account),
 
 
 
@@ -801,7 +773,7 @@ fun LandscapeLauncherLayout(
 
 
 
-                    label = "Play",
+                    label = stringResource(R.string.cubiq_home_play_title),
 
 
 
@@ -825,7 +797,7 @@ fun LandscapeLauncherLayout(
 
 
 
-                    label = "Installations",
+                    label = stringResource(R.string.cubiq_home_installations),
 
 
 
@@ -849,7 +821,7 @@ fun LandscapeLauncherLayout(
 
 
 
-                    label = "Skins",
+                    label = stringResource(R.string.cubiq_home_skins),
 
 
 
@@ -869,30 +841,6 @@ fun LandscapeLauncherLayout(
 
 
 
-                LandscapeNavButton(
-
-
-
-                    label = "Patch Notes",
-
-
-
-                    iconRes = R.drawable.ic_mc_book_and_quill,
-
-
-
-                    isActive = activeLandscapeIndex == 3,
-
-
-
-                    onClick = { onSelectTab(1, 2) }
-
-
-
-                )
-
-
-
 
 
 
@@ -905,31 +853,7 @@ fun LandscapeLauncherLayout(
 
 
 
-                    label = "News",
-
-
-
-                    iconRes = R.drawable.ic_mc_pc_news,
-
-
-
-                    isActive = activeLandscapeIndex == 4,
-
-
-
-                    onClick = { onSelectTab(0, -1) }
-
-
-
-                )
-
-
-
-                LandscapeNavButton(
-
-
-
-                    label = "Mods",
+                    label = stringResource(R.string.cubiq_home_mods),
 
 
 
@@ -950,7 +874,7 @@ fun LandscapeLauncherLayout(
 
 
                 LandscapeNavButton(
-                    label = "Settings",
+                    label = stringResource(R.string.cubiq_home_settings),
                     iconRes = R.drawable.ic_mc_pc_profile,
                     isActive = activeLandscapeIndex == 6,
                     onClick = {
@@ -1123,70 +1047,6 @@ fun LandscapeLauncherLayout(
 
 
                         account = account,
-
-
-
-                        onBackClick = { onSelectTab(1, -1) }
-
-
-
-                    )
-
-
-
-                }
-
-
-
-
-
-
-
-                // 3: Patch Notes
-
-
-
-                3 -> {
-
-
-
-                    MinecraftPatchNotesScreen(
-
-
-
-                        onOpenLink = onOpenLink,
-
-
-
-                        onBackClick = { onSelectTab(1, -1) }
-
-
-
-                    )
-
-
-
-                }
-
-
-
-
-
-
-
-                // 4: News
-
-
-
-                4 -> {
-
-
-
-                    MinecraftNewsScreen(
-
-
-
-                        onOpenLink = onOpenLink,
 
 
 
@@ -1472,7 +1332,7 @@ fun LandscapePlayScreen(
                                 .data(pageArt)
                                 .size(1920, 1080)
                                 .build(),
-                            contentDescription = "Minecraft Version Hero Artwork",
+                            contentDescription = stringResource(R.string.cubiq_home_hero_art_description),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center
@@ -1483,7 +1343,7 @@ fun LandscapePlayScreen(
                         if (!isTrailsAndTales) {
                             Image(
                                 painter = painterResource(R.drawable.img_mc_java_logo),
-                                contentDescription = "Minecraft Java Edition",
+                                contentDescription = stringResource(R.string.cubiq_home_java_edition_description),
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
                                     .padding(top = 16.dp)
@@ -1624,7 +1484,7 @@ fun LandscapePlayScreen(
                                     .data(pageArt)
                                     .size(1920, 1080)
                                     .build(),
-                                contentDescription = "Minecraft Version Hero Artwork",
+                                contentDescription = stringResource(R.string.cubiq_home_hero_art_description),
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop,
                                 alignment = Alignment.Center
@@ -1635,7 +1495,7 @@ fun LandscapePlayScreen(
                             if (!isTrailsAndTales) {
                                 Image(
                                     painter = painterResource(R.drawable.img_mc_java_logo),
-                                    contentDescription = "Minecraft Java Edition",
+                                    contentDescription = stringResource(R.string.cubiq_home_java_edition_description),
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
                                         .padding(top = 16.dp)
@@ -1717,7 +1577,7 @@ fun LandscapePlayScreen(
                     val latestReleaseVersion by MinecraftOfficialContentManager.latestReleaseVersion.collectAsStateWithLifecycle()
                     val activeVer = currentVersion ?: allVersions.firstOrNull()
                     val mcVer = activeVer?.getVersionInfo()?.minecraftVersion
-                    val verTitle = if (activeVer == null) "Latest Release" else "Selected Version"
+                    val verTitle = stringResource(if (activeVer == null) R.string.cubiq_home_latest_release else R.string.cubiq_home_selected_version)
                     val verDisplay = if (mcVer != null && activeVer != null) {
                         "${activeVer.getVersionName()} ($mcVer)"
                     } else {
@@ -1743,13 +1603,13 @@ fun LandscapePlayScreen(
                             if (verIconFile != null) {
                                 coil3.compose.AsyncImage(
                                     model = verIconFile,
-                                    contentDescription = "Version Icon",
+                                    contentDescription = stringResource(R.string.cubiq_home_version_icon),
                                     modifier = Modifier.size(24.dp)
                                 )
                             } else {
                                 Image(
                                     painter = painterResource(R.drawable.img_minecraft),
-                                    contentDescription = "Version Icon",
+                                    contentDescription = stringResource(R.string.cubiq_home_version_icon),
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -1795,7 +1655,7 @@ fun LandscapePlayScreen(
                                 DropdownMenuItem(
                                     text = {
                                         Text(
-                                            text = "Latest Release ($latestReleaseVersion)",
+                                            text = stringResource(R.string.cubiq_home_latest_release_with_version, latestReleaseVersion),
                                             color = Color.White,
                                             fontFamily = MinecraftFontFamily,
                                             fontWeight = FontWeight.Bold
@@ -1833,7 +1693,7 @@ fun LandscapePlayScreen(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        text = "+ Manage Installations",
+                                        text = stringResource(R.string.cubiq_home_manage_installations),
                                         color = Color(0xFF55FF55),
                                         fontFamily = MinecraftFontFamily,
                                         fontWeight = FontWeight.Bold
@@ -1855,7 +1715,7 @@ fun LandscapePlayScreen(
                         },
                         style = MinecraftButtonStyle.GREEN,
                         isLoading = isRefreshingVersions,
-                        text = "PLAY",
+                        text = stringResource(R.string.cubiq_home_play),
                         fontSize = 18.sp,
                         modifier = Modifier
                             .width(220.dp)
@@ -1929,7 +1789,7 @@ fun LandscapeTopRightActions(
                 AllSettings.heroCardAutoScroll.save(!AllSettings.heroCardAutoScroll.getValue())
             },
             style = if (autoScroll) MinecraftButtonStyle.GREEN else MinecraftButtonStyle.STONE,
-            text = if (autoScroll) "AUTO: ON" else "AUTO: OFF",
+            text = stringResource(if (autoScroll) R.string.cubiq_home_auto_on else R.string.cubiq_home_auto_off),
             fontSize = 11.sp,
             modifier = Modifier
                 .height(32.dp)
@@ -1966,7 +1826,7 @@ fun LandscapeTopRightActions(
 
 
 
-            text = "FILES",
+            text = stringResource(R.string.cubiq_home_files),
 
 
 
@@ -2022,7 +1882,7 @@ fun LandscapeTopRightActions(
 
 
 
-            text = "MULTIPLAYER",
+            text = stringResource(R.string.cubiq_home_multiplayer),
 
 
 
@@ -2130,7 +1990,7 @@ fun LandscapeTopRightActions(
 
 
 
-                contentDescription = "Rotate Screen",
+                contentDescription = stringResource(R.string.cubiq_home_rotate_screen),
 
 
 
@@ -2525,7 +2385,7 @@ fun ForkWarningDialog(
 
 
 
-                            text = "UNOFFICIAL FORK NOTICE",
+                            text = stringResource(R.string.cubiq_home_fork_notice_title),
 
 
 
@@ -2553,7 +2413,7 @@ fun ForkWarningDialog(
 
 
 
-                            text = "GPLv3 Open Source Attribution",
+                            text = stringResource(R.string.cubiq_home_gpl_attribution),
 
 
 
@@ -2625,7 +2485,7 @@ fun ForkWarningDialog(
 
 
 
-                        text = "Cubiq Launcher is an independent, unofficial fork of Zalith Launcher 2, licensed under the GNU General Public License v3.0 (GPLv3).",
+                        text = stringResource(R.string.cubiq_home_fork_description),
 
 
 
@@ -2689,7 +2549,7 @@ fun ForkWarningDialog(
 
 
 
-                            text = "This launcher is NOT affiliated with, endorsed by, or supported by the original Zalith Launcher authors, Mojang Studios, or Microsoft Corporation.",
+                            text = stringResource(R.string.cubiq_home_fork_disclaimer),
 
 
 
@@ -2725,7 +2585,7 @@ fun ForkWarningDialog(
 
 
 
-                        text = "All modifications and source code comply with GPLv3. For support or bug reports, please use the official Cubiq Launcher community.",
+                        text = stringResource(R.string.cubiq_home_fork_support),
 
 
 
@@ -2793,7 +2653,7 @@ fun ForkWarningDialog(
 
 
 
-                        text = "DON'T SHOW AGAIN",
+                        text = stringResource(R.string.cubiq_home_dont_show_again),
 
 
 
@@ -2833,7 +2693,7 @@ fun ForkWarningDialog(
 
 
 
-                        text = "I UNDERSTOOD",
+                        text = stringResource(R.string.cubiq_home_understood),
 
 
 

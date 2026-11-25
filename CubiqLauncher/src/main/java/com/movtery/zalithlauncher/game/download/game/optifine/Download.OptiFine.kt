@@ -28,7 +28,6 @@ import com.movtery.zalithlauncher.game.addons.modloader.ModLoader
 import com.movtery.zalithlauncher.game.addons.modloader.optifine.OptiFineVersion
 import com.movtery.zalithlauncher.game.addons.modloader.optifine.OptiFineVersions
 import com.movtery.zalithlauncher.ui.androidText
-import com.movtery.zalithlauncher.utils.isChinaMainland
 import com.movtery.zalithlauncher.utils.network.downloadFile
 import com.movtery.zalithlauncher.utils.network.withSpeedReport
 import kotlinx.coroutines.Dispatchers
@@ -63,8 +62,6 @@ fun getOptiFineDownloadTask(
             task.updateMessage(androidText(
                 R.string.download_game_install_optifine_fetch_download_url, optifine.realVersion
             ))
-            val optifineUrl = getOFUrlMirrorable(optifine)
-
             task.updateProgress(-1f)
             task.updateMessage(androidText(
                 R.string.download_game_install_base_download_file, ModLoader.OPTIFINE.displayName, optifine.realVersion
@@ -77,10 +74,7 @@ fun getOptiFineDownloadTask(
                     task.clearSpeed()
                 }
             ) {
-                downloadFile(
-                    url = optifineUrl,
-                    outputFile = targetTempInstaller
-                )
+                downloadOptiFineFromSources(optifine, targetTempInstaller, it)
             }
         }
     )
@@ -98,8 +92,6 @@ fun getOptiFineModsDownloadTask(
             task.updateMessage(androidText(
                 R.string.download_game_install_optifine_fetch_download_url, optifine.realVersion
             ))
-            val optifineUrl = getOFUrlMirrorable(optifine)
-
             //开始下载为 Mod
             task.updateProgress(-1f)
             task.updateMessage(androidText(
@@ -113,39 +105,28 @@ fun getOptiFineModsDownloadTask(
                     task.clearSpeed()
                 }
             ) { report ->
-                downloadFile(
-                    url = optifineUrl,
-                    outputFile = File(tempModsDir, optifine.fileName),
-                    sizeCallback = report
-                )
+                downloadOptiFineFromSources(optifine, File(tempModsDir, optifine.fileName), report)
             }
         }
     )
 }
 
-private suspend fun getOFUrlMirrorable(
-    optifine: OptiFineVersion
-): String {
-    return if (isChinaMainland()) {
-        runMirrorable(
-            listOf(
-                fetchOfficialOptiFineUrlSource(optifine),
-                fetchBMCLOptiFineUrlSource(optifine)
-            ).orderedByGameSourcePreference()
-        )!!
-    } else {
-        fetchOptiFineDownloadUrl(optifine)
-    }
+private suspend fun downloadOptiFineFromSources(
+    optifine: OptiFineVersion,
+    outputFile: File,
+    onBytes: (Long) -> Unit
+) {
+    runMirrorable(
+        listOf(
+            MirrorSource<Unit>(SourceType.OFFICIAL) {
+                downloadFile(fetchOptiFineDownloadUrl(optifine), outputFile, sizeCallback = onBytes)
+            },
+            MirrorSource<Unit>(SourceType.BMCLAPI) {
+                downloadFile(getDownloadUrlWithBMCLAPI(optifine), outputFile, sizeCallback = onBytes)
+            }
+        ).orderedByGameSourcePreference()
+    )
 }
-
-/**
- * 从官方源获取 OptiFine 主文件下载链接
- */
-private fun fetchOfficialOptiFineUrlSource(optifine: OptiFineVersion): MirrorSource<String> =
-    MirrorSource(SourceType.OFFICIAL) { fetchOptiFineDownloadUrl(optifine) }
-
-private fun fetchBMCLOptiFineUrlSource(optifine: OptiFineVersion): MirrorSource<String> =
-    MirrorSource(SourceType.BMCLAPI) { getDownloadUrlWithBMCLAPI(optifine) }
 
 private suspend fun fetchOptiFineDownloadUrl(
     optifine: OptiFineVersion

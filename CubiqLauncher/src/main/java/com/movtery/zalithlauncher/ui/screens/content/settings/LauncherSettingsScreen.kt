@@ -115,7 +115,6 @@ import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
 import com.movtery.zalithlauncher.utils.animation.TransitionAnimationType
 import com.movtery.zalithlauncher.utils.file.shareFile
-import com.movtery.zalithlauncher.utils.isChinaMainland
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.string.getMessageOrToString
 import com.movtery.zalithlauncher.viewmodel.BackgroundViewModel
@@ -203,17 +202,7 @@ fun LauncherSettingsScreen(
                         getItemText = { stringResource(it.textRes) }
                     )
 
-                    ListSettingsCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        position = CardPosition.Middle,
-                        unit = AllSettings.launcherLanguage,
-                        items = AppLanguage.entries,
-                        title = stringResource(R.string.settings_launcher_language),
-                        getItemText = { stringResource(it.textRes) },
-                        onValueChange = {
-                            applyLanguage(it)
-                        }
-                    )
+                    LauncherLanguageCard(CardPosition.Middle)
 
                     SwitchSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
@@ -371,37 +360,11 @@ fun LauncherSettingsScreen(
                         .fillMaxWidth()
                         .offset { IntOffset(x = 0, y = yOffset.roundToPx()) }
                 ) {
-                    //这些镜像源都是为了改善中国大陆内陆的网络环境而存在的
-                    //境外不需要这些镜像源，反而可能拖慢境外的下载速度
-                    //所以不应该向中国境外开放这些选项
-                    val isChinaMainland = remember { isChinaMainland() }
-                    if (isChinaMainland) {
-                        ListSettingsCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            position = CardPosition.Top,
-                            unit = AllSettings.gameDownloadSource,
-                            items = MirrorSourceType.entries,
-                            title = stringResource(R.string.settings_launcher_mirror_game_source_title),
-                            getItemText = { stringResource(it.textRes) }
-                        )
-
-                        ListSettingsCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            position = CardPosition.Middle,
-                            unit = AllSettings.assetPlatformSource,
-                            items = MirrorSourceType.entries,
-                            title = stringResource(R.string.settings_launcher_mirror_asset_platform_source_title),
-                            getItemText = { stringResource(it.textRes) }
-                        )
-                    }
+                    LauncherDownloadSourceCards(CardPosition.Top, CardPosition.Middle)
 
                     IntSliderSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
-                        position = if (isChinaMainland) {
-                            CardPosition.Middle
-                        } else {
-                            CardPosition.Top
-                        },
+                        position = CardPosition.Middle,
                         unit = AllSettings.launcherLogRetentionDays,
                         title = stringResource(R.string.settings_launcher_log_retention_days_title),
                         summary = stringResource(R.string.settings_launcher_log_retention_days_summary),
@@ -443,6 +406,58 @@ fun LauncherSettingsScreen(
         }
     }
 }
+
+@Composable
+internal fun LauncherLanguageCard(position: CardPosition) {
+    ListSettingsCard(
+        modifier = Modifier.fillMaxWidth(),
+        position = position,
+        unit = AllSettings.launcherLanguage,
+        items = AppLanguage.entries,
+        title = stringResource(R.string.settings_launcher_language),
+        getItemText = { stringResource(it.textRes) },
+        onValueChange = ::applyLanguage
+    )
+}
+
+@Composable
+internal fun LauncherDownloadSourceCards(gamePosition: CardPosition, assetPosition: CardPosition) {
+    ListSettingsCard(
+        modifier = Modifier.fillMaxWidth(),
+        position = gamePosition,
+        unit = AllSettings.gameDownloadSource,
+        items = MirrorSourceType.entries,
+        title = stringResource(R.string.settings_launcher_mirror_game_source_title),
+        summary = stringResource(R.string.settings_launcher_mirror_game_summary),
+        getItemText = { source -> downloadSourceName(source, "BMCLAPI") },
+        getItemSummary = { source -> DownloadSourceOptionSummary(source) }
+    )
+    ListSettingsCard(
+        modifier = Modifier.fillMaxWidth(),
+        position = assetPosition,
+        unit = AllSettings.assetPlatformSource,
+        items = MirrorSourceType.entries,
+        title = stringResource(R.string.settings_launcher_mirror_asset_platform_source_title),
+        summary = stringResource(R.string.settings_launcher_mirror_asset_summary),
+        getItemText = { source -> downloadSourceName(source, "MCIM") },
+        getItemSummary = { source -> DownloadSourceOptionSummary(source) }
+    )
+}
+
+@Composable
+private fun DownloadSourceOptionSummary(source: MirrorSourceType) {
+    if (source == MirrorSourceType.AUTO) {
+        Text(
+            text = stringResource(R.string.settings_launcher_mirror_auto_summary),
+            style = MaterialTheme.typography.labelSmall
+        )
+    }
+}
+
+@Composable
+private fun downloadSourceName(source: MirrorSourceType, mirrorName: String): String =
+    if (source == MirrorSourceType.MIRROR) stringResource(R.string.settings_launcher_mirror_named, mirrorName)
+    else stringResource(source.textRes)
 
 @Composable
 private fun CustomColorOperation(
