@@ -939,7 +939,7 @@ object AllSettings : SettingsRegistry() {
 
         "gameDownloadSource",
 
-        MirrorSourceType.OFFICIAL,
+        MirrorSourceType.MIRROR,
 
         MirrorSourceType.LEGACY_NAMES
 
@@ -957,7 +957,7 @@ object AllSettings : SettingsRegistry() {
 
         "assetPlatformSource",
 
-        MirrorSourceType.OFFICIAL,
+        MirrorSourceType.MIRROR,
 
         MirrorSourceType.LEGACY_NAMES
 

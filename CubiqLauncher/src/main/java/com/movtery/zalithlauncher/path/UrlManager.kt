@@ -186,7 +186,7 @@ private fun buildDownloadClient(
         .dns(ResilientDns) //系统 DNS 解析失败时，自动回退到 DoH 解析
         .apply { allowedProtocols?.let { protocols(it) } } //不指定时默认协商 h2：单条多路复用连接承载海量小请求
         .connectionPool(ConnectionPool(64, 5, TimeUnit.MINUTES))
-        .connectTimeout(15, TimeUnit.SECONDS)
+        .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(readTimeoutMillis, TimeUnit.MILLISECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
